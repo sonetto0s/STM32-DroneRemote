@@ -1,21 +1,38 @@
 
+Debug/
+Release/
+Objects/
+Listings/
+
 *.o
+*.obj
 *.d
-*.lst
-*.map
-*.axf
-*.crf
 *.dep
+*.map
+*.lst
+*.crf
 *.bak
 *.tmp
 
 
+*.axf
+*.elf
+*.hex
+*.bin
+*.lib
+
+
 *.uvoptx
 *.uvguix.*
-*.scvd
+*.lnp
+*.build_log.htm
+*.htm
+*.html
 
-Debug/
-Release/
+
+!*.uvprojx
+!*.uvproj
+
 
 .settings/
 
@@ -23,6 +40,24 @@ Release/
 .vscode/
 
 
+Thumbs.db
+Desktop.ini
+
 
 .DS_Store
-Thumbs.db
+
+
+*~
+
+*.log
+
+
+*.swp
+*.swo
+
+
+__pycache__/
+
+
+
+*.code-workspace
