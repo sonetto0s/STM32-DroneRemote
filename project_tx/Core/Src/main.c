@@ -35,7 +35,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#include "protocol.h"
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -123,22 +123,27 @@ int main(void)
 
 while (1)
 {
-	remote_update();
+	  remote_update();
 //	sprintf(buf, "Lx: %d  Ly:%d  Rx:%d  Ry:%d  \r\n", rem.lx,
 //                                                      rem.ly,
 //                                                      rem.rx,
 //                                                      rem.ry);
     if(send_flag)
     {
-        tx.head1 = 0xAA;
-        tx.head2 = 0x55;
-        tx.roll = ch.roll;
-        tx.pitch = ch.pitch;
-        tx.yaw = ch.yaw;
-        tx.throttle = ch.throttle;
-        tx.crc = crcme((uint8_t *)&tx,sizeof(Frame)-1);
-        HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
-        send_flag	 = 0;
+			frame_init(&tx);
+			frame_setchannels(&tx,&ch);
+			frame_update_crc(&tx);
+			HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
+			send_flag=0;
+//        tx.head1 = 0xAA;
+//        tx.head2 = 0x55;
+//        tx.ch.roll = ch.roll;
+//        tx.ch.pitch = ch.pitch;
+//        tx.ch.yaw = ch.yaw;
+//        tx.ch.throttle = ch.throttle;
+//        tx.crc = crcme((uint8_t *)&tx,sizeof(Frame)-2);
+//        HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
+//        send_flag	 = 0;
     }
 //    sprintf(buf,"%d %d %d %d\r\n",
 //           ch.roll,
@@ -146,7 +151,7 @@ while (1)
 //           ch.yaw,
 //           ch.throttle);
 //    uart_send_string(buf);
-			HAL_Delay(300);
+		
 
     /* USER CODE END WHILE */
 

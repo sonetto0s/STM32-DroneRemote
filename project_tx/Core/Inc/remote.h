@@ -29,11 +29,10 @@ typedef struct
 {
 	  uint8_t head1;
     uint8_t head2;
-    int16_t roll;
-    int16_t pitch;
-    int16_t yaw;
-    int16_t throttle;
-    uint8_t crc;
+    uint8_t length;
+	  uint8_t type;
+	  Channels ch;
+    uint16_t crc;
 
 } Frame;
 
@@ -44,6 +43,6 @@ extern Channels ch;
 void remote_init(void);
 void remote_update(void);
 int throttle_map(int raw);
-int crcme(uint8_t *data, uint16_t len);
+
 
 #endif

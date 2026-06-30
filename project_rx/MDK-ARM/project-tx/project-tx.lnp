@@ -6,6 +6,7 @@
 "project-tx\stm32f1xx_it.o"
 "project-tx\stm32f1xx_hal_msp.o"
 "project-tx\remote.o"
+"project-tx\protocol.o"
 "project-tx\stm32f1xx_hal_gpio_ex.o"
 "project-tx\stm32f1xx_hal_uart.o"
 "project-tx\stm32f1xx_hal.o"

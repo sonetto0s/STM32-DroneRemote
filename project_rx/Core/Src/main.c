@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include "remote.h"
 #include <string.h>
+#include "protocol.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,7 +160,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         Frame *p = (Frame *)rx_buf;
         if (p->head1 == 0xAA &&p->head2 == 0x55)
         {
-            uint8_t crc =crcme(rx_buf,sizeof(Frame)-1) ;
+            uint16_t crc =protocol_crc(rx_buf,sizeof(Frame)-2) ;
             if(crc==p->crc)
             {
                 rx = *p;
@@ -170,6 +171,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         // memcpy(&ch_rx,rx_buf,sizeof(Channels));
         // sprintf(feed_buf,"Lx:%d  Ly:%d  Rx:%d  Ry:%d  ",ch_rx.roll,ch_rx.pitch,ch_rx.yaw,ch_rx.throttle);
         // uart_send_string(feed_buf);
+        HAL_UART_Receive_IT(&huart1,rx_buf,sizeof(Frame));
+    }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART1)
+    {
+        __HAL_UART_CLEAR_OREFLAG(huart);
+        huart->RxState = HAL_UART_STATE_READY;
         HAL_UART_Receive_IT(&huart1,rx_buf,sizeof(Frame));
     }
 }
