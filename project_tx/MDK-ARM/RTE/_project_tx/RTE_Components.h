@@ -3,8 +3,8 @@
  * Auto generated Run-Time-Environment Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'project-tx' 
- * Target:  'project-tx' 
+ * Project: 'project_rx' 
+ * Target:  'project_rx' 
  */
 
 #ifndef RTE_COMPONENTS_H

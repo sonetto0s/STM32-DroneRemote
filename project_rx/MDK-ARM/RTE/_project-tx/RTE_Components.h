@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'project-tx' 
+ * Project: 'project_rx' 
  * Target:  'project-tx' 
  */
 

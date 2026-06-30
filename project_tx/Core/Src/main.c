@@ -18,6 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -26,6 +29,8 @@
 #include <stdio.h>
 #include "remote.h"
 #include <string.h>
+#include <stdint.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,9 +51,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t rx_buf[sizeof(Frame)];
-Frame rx;
-char feed_buf[64];
+volatile uint16_t adc_buf[4] = {0};
+volatile uint16_t send_flag = 0;
+Frame tx;
+extern Channels ch;
+char buf[64];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,10 +66,14 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void uart_send_string(const char *str)
-{
-    HAL_UART_Transmit(&huart1, (uint8_t *)str, strlen(str), HAL_MAX_DELAY); 
-}
+
+
+
+// void uart_send_string(const char *str)
+// {
+   
+// }
+
 
 /* USER CODE END 0 */
 
@@ -74,7 +85,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -95,16 +106,48 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_ADC1_Init();
   MX_USART1_UART_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart1, rx_buf, sizeof(Frame));
+  remote_init();
+  HAL_ADCEx_Calibration_Start(&hadc1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, 4);
+  HAL_TIM_Base_Start_IT(&htim2);
+  //  uart_send_string("Program Start\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    
+
+while (1)
+{
+	remote_update();
+//	sprintf(buf, "Lx: %d  Ly:%d  Rx:%d  Ry:%d  \r\n", rem.lx,
+//                                                      rem.ly,
+//                                                      rem.rx,
+//                                                      rem.ry);
+    if(send_flag)
+    {
+        tx.head1 = 0xAA;
+        tx.head2 = 0x55;
+        tx.roll = ch.roll;
+        tx.pitch = ch.pitch;
+        tx.yaw = ch.yaw;
+        tx.throttle = ch.throttle;
+        tx.crc = crcme((uint8_t *)&tx,sizeof(Frame)-1);
+        HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
+        send_flag	 = 0;
+    }
+//    sprintf(buf,"%d %d %d %d\r\n",
+//           ch.roll,
+//           ch.pitch,
+//           ch.yaw,
+//           ch.throttle);
+//    uart_send_string(buf);
+			HAL_Delay(300);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -120,6 +163,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -149,30 +193,24 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    if (huart->Instance == USART1)
+    if (htim->Instance == TIM2)
     {
-        Frame *p = (Frame *)rx_buf;
-        if (p->head1 == 0xAA &&p->head2 == 0x55)
-        {
-            uint8_t crc =crcme(rx_buf,sizeof(Frame)-1) ;
-            if(crc==p->crc)
-            {
-                rx = *p;
-                HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-            }
-        }
-        // HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-        // memcpy(&ch_rx,rx_buf,sizeof(Channels));
-        // sprintf(feed_buf,"Lx:%d  Ly:%d  Rx:%d  Ry:%d  ",ch_rx.roll,ch_rx.pitch,ch_rx.yaw,ch_rx.throttle);
-        // uart_send_string(feed_buf);
-        HAL_UART_Receive_IT(&huart1,rx_buf,sizeof(Frame));
+        send_flag = 1;
     }
 }
+
 /* USER CODE END 4 */
 
 /**
