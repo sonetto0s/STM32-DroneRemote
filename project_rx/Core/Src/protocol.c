@@ -32,12 +32,51 @@ void frame_init(Frame *frame)
     frame->crc = 0;
 }
 
-void frame_setchannels(Frame *frame,const Channels *ch)
+void frame_getchannels(Frame *frame,const Channels *ch)
 {
     memcpy(&(frame->ch), ch, sizeof(Channels));
 }
 
-void frame_update_crc(Frame *frame)
+void frame_update_crc (Frame *frame)
 {
-    frame->crc = protocol_crc((uint8_t *)frame,sizeof(Frame)-sizeof(frame->crc));
+    frame->crc = protocol_crc((uint8_t *)frame, sizeof(Frame) - 2);
 }
+
+uint8_t frame_check(const Frame *frame)
+{
+    if (frame->head1 != FRAME_HEADER_1)
+        return FRAME_HEAD_ERR;
+    if (frame->head2 != FRAME_HEADER_2)
+        return FRAME_HEAD_ERR;
+    if (frame->length != sizeof(Channels))
+        return FRAME_LEN_ERR;
+    if (frame->type != FRAME_TYPE_CHANNEL)
+        return FRAME_TYPE_ERR;
+    uint16_t crc = protocol_crc((uint8_t *)frame, sizeof(Frame) - 2);
+    if (crc != frame->crc)
+    {
+        return FRAME_CRC_ERR;
+    }
+    return FRAME_OK;
+}
+
+
+int frame_parser(uint8_t * buf,uint16_t len,Frame *fr)
+{
+    if (len < sizeof(Frame))
+        return 0;
+    for (int i = 0; i <= len - sizeof(Frame); i++)
+    {
+            if (buf[i] == FRAME_HEADER_1 && buf[i + 1] == FRAME_HEADER_2)
+            {
+                memcpy(fr, &buf[i], sizeof(Frame));
+                return 1;
+                // if (frame_check(fr) == FRAME_OK)
+                // {
+
+                // }
+            }
+    }
+    return 0;
+}
+

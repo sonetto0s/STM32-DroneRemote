@@ -22,18 +22,20 @@ Dialog DLL:      TCM.DLL V1.53.0.0
  
 <h2>Project:</h2>
 D:\hals\stm32droneremote\project_rx\MDK-ARM\project_rx.uvprojx
-Project File Date:  06/30/2026
+Project File Date:  07/01/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
-Build target 'project-tx'
-compiling remote.c...
+Build target 'project_rx'
 compiling protocol.c...
 compiling main.c...
+../Core/Src/main.c(190): warning:  #188-D: enumerated type mixed with another type
+              fs=frame_check(&rx);
+../Core/Src/main.c: 1 warning, 0 errors
 linking...
-Program Size: Code=4954 RO-data=310 RW-data=16 ZI-data=1736  
+Program Size: Code=6154 RO-data=310 RW-data=24 ZI-data=1824  
 FromELF: creating hex file...
-"project-tx\project-tx.axf" - 0 Error(s), 0 Warning(s).
+"project-tx\project-tx.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -49,7 +51,7 @@ Package Vendor: Keil
                 STMicroelectronics STM32F1 Series Device Support, Drivers and Examples
 
 <h2>Collection of Component include folders:</h2>
-  .\RTE\_project-tx
+  .\RTE\_project_rx
   C:\Users\³Â\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include
   C:\Users\³Â\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.3.0\Device\Include
 

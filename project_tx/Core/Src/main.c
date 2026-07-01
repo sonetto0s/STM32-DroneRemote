@@ -123,7 +123,7 @@ int main(void)
 
 while (1)
 {
-	  remote_update();
+	
 //	sprintf(buf, "Lx: %d  Ly:%d  Rx:%d  Ry:%d  \r\n", rem.lx,
 //                                                      rem.ly,
 //                                                      rem.rx,
@@ -212,6 +212,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2)
     {
+        remote_update();
         send_flag = 1;
     }
 }

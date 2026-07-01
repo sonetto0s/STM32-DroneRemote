@@ -27,11 +27,11 @@ typedef struct{
 
 typedef struct
 {
-	  uint8_t head1;
+	uint8_t head1;
     uint8_t head2;
     uint8_t length;
-	  uint8_t type;
-	  Channels ch;
+	uint8_t type;
+	Channels ch;
     uint16_t crc;
 
 } Frame;

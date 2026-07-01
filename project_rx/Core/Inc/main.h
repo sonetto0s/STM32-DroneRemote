@@ -31,7 +31,9 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+//void debug_frame(FrameStatus st);
+//void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart);
+//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size);
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

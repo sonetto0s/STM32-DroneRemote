@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -47,9 +48,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t rx_buf[sizeof(Frame)];
+Channels ch;
 Frame rx;
-char feed_buf[64];
+uint8_t dma_rx_buf[32];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -96,9 +97,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart1, rx_buf, sizeof(Frame));
+
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, dma_rx_buf, sizeof(dma_rx_buf));
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -153,25 +156,52 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void debug_frame(FrameStatus st)
 {
+    switch (st)
+    {
+    case FRAME_HEAD_ERR:
+        uart_send_string("HEAD ERROR!\r\n");
+        break;
+
+    case FRAME_LEN_ERR:
+        uart_send_string("LEN ERRPR!\r\n");
+        break;
+
+    case FRAME_CRC_ERR:
+        uart_send_string("CRC ERROR!\r\n");
+        break;
+    case FRAME_TYPE_ERR:
+        uart_send_string("TYPE ERROR!\r\n");
+        break;
+    default:
+        break;
+    }
+}
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
+{   
     if (huart->Instance == USART1)
     {
-        Frame *p = (Frame *)rx_buf;
-        if (p->head1 == 0xAA &&p->head2 == 0x55)
+        FrameStatus fs;
+        // if (size == sizeof(Frame))
+        //
+        if (frame_parser(dma_rx_buf, size, &rx))
         {
-            uint16_t crc =protocol_crc(rx_buf,sizeof(Frame)-2) ;
-            if(crc==p->crc)
+            fs=frame_check(&rx);
+            // memcpy(&rx, dma_rx_buf, sizeof(Frame));
+            if (fs != FRAME_OK)
             {
-                rx = *p;
-                HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+                // debug_frame(fs);
+                
             }
-        }
-        // HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-        // memcpy(&ch_rx,rx_buf,sizeof(Channels));
-        // sprintf(feed_buf,"Lx:%d  Ly:%d  Rx:%d  Ry:%d  ",ch_rx.roll,ch_rx.pitch,ch_rx.yaw,ch_rx.throttle);
-        // uart_send_string(feed_buf);
-        HAL_UART_Receive_IT(&huart1,rx_buf,sizeof(Frame));
+            else
+            {
+                frame_getchannels(&rx,&ch);
+                HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+            }
+          
+        } 
+        HAL_UARTEx_ReceiveToIdle_DMA(&huart1, dma_rx_buf, sizeof(dma_rx_buf));
     }
 }
 
@@ -179,11 +209,11 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART1)
     {
-        __HAL_UART_CLEAR_OREFLAG(huart);
-        huart->RxState = HAL_UART_STATE_READY;
-        HAL_UART_Receive_IT(&huart1,rx_buf,sizeof(Frame));
+        HAL_UARTEx_ReceiveToIdle_DMA(&huart1, dma_rx_buf, sizeof(dma_rx_buf));
     }
 }
+
+
 /* USER CODE END 4 */
 
 /**

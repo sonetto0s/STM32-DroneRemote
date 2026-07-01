@@ -39,7 +39,7 @@ typedef struct{
 
 typedef struct
 {
-	  uint8_t head1;
+	uint8_t head1;
     uint8_t head2;
     int16_t roll;
     int16_t pitch;
@@ -63,6 +63,6 @@ typedef struct
 ## 通信效率提升
 - 已添加工程CRC-16 校验
 - 已通过pragma使结构体对齐
-- 已使用自行定义数据帧协议
+- 已使用自行定义数据帧Frame协议
 
 

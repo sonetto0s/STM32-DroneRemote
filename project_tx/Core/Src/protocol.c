@@ -39,5 +39,6 @@ void frame_setchannels(Frame *frame,const Channels *ch)
 
 void frame_update_crc(Frame *frame)
 {
-    frame->crc = protocol_crc((uint8_t *)frame,sizeof(Frame)-sizeof(frame->crc));
+    frame->crc = protocol_crc((uint8_t *)frame, sizeof(Frame) - 2);
 }
+
