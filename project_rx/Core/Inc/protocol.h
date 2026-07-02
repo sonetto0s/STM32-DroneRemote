@@ -25,7 +25,7 @@ typedef enum
 
 uint16_t protocol_crc(uint8_t *data, uint16_t len);
 void frame_init(Frame *frame);
-void frame_getchannels(Frame *frame, const Channels *ch);
+void frame_getchannels(Frame *frame, Channels *ch);
 void frame_update_crc(Frame *frame);
 uint8_t frame_check(const Frame *frame);
 int frame_parser(uint8_t *buf, uint16_t len, Frame *fr);

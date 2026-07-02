@@ -35,14 +35,14 @@ Listings/
 
 
 .settings/
-
+.clinerules/
 
 .vscode/
 
 
 Thumbs.db
 Desktop.ini
-
+workspace.code-workspace
 
 .DS_Store
 

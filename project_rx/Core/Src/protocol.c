@@ -32,9 +32,9 @@ void frame_init(Frame *frame)
     frame->crc = 0;
 }
 
-void frame_getchannels(Frame *frame,const Channels *ch)
+void frame_getchannels(Frame *frame,Channels *ch)
 {
-    memcpy(&(frame->ch), ch, sizeof(Channels));
+    memcpy(ch,&(frame->ch),sizeof(Channels));
 }
 
 void frame_update_crc (Frame *frame)

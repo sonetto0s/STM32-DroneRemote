@@ -23,7 +23,7 @@ int  improvenum(uint16_t raw)
     {
         deadnum = 0;
     }
-    return (deadnum * 700) / 2048;
+    return (deadnum * 1000) / 2048;
 }
 
 void remote_update(void)
@@ -55,6 +55,10 @@ int throttle_map(int raw)
         raw = 700;
         return (raw * 1000) / 700;
 }
+
+
+
+
 
 
 

@@ -28,6 +28,7 @@
 #include "remote.h"
 #include <string.h>
 #include "protocol.h"
+#include "sbus.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,6 +52,8 @@
 Channels ch;
 Frame rx;
 uint8_t dma_rx_buf[32];
+SBUS_FRAME sbus;
+uint8_t rx_ready = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,6 +102,7 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, dma_rx_buf, sizeof(dma_rx_buf));
@@ -108,7 +112,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    
+    // if(rx_ready)
+    // {
+
+
+    // }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -195,7 +203,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
                 
             }
             else
-            {
+            {   
+                rx_ready=1;
                 frame_getchannels(&rx,&ch);
                 HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
             }
