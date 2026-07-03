@@ -20,6 +20,7 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -30,12 +31,14 @@
 #include "remote.h"
 #include <string.h>
 #include <stdint.h>
-
+#include "lora.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 #include "protocol.h"
+#include "RFsx1276.h"
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -110,24 +113,39 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   MX_TIM2_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+	RF_Sx1276_Init();
   remote_init();
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, 4);
   HAL_TIM_Base_Start_IT(&htim2);
+	SX1276StartRx();
   //  uart_send_string("Program Start\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
+	uint8_t spi_tx_data = 0xAA; 
+  uint8_t spi_rx_data = 0x00;
 while (1)
 {
-	
-//	sprintf(buf, "Lx: %d  Ly:%d  Rx:%d  Ry:%d  \r\n",   rem.lx,
-//                                                      rem.ly,
-//                                                      rem.rx,
-//                                                      rem.ry);
+//	 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); 
+//	
+//	 HAL_GPIO_WritePin(LORA_NSS_GPIO_Port, LORA_NSS_Pin, GPIO_PIN_RESET);
+//	
+//	if(HAL_SPI_TransmitReceive(&hspi1, &spi_tx_data, &spi_rx_data, 1, 100) != HAL_OK)
+//    {
+//        // ?? SPI ??,LED ???(??????????)
+//        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+//        Error_Handler();
+//    }
+//		
+//		HAL_GPIO_WritePin(LORA_NSS_GPIO_Port, LORA_NSS_Pin, GPIO_PIN_SET);
+//		
+//		HAL_Delay(200); 
+                                                   
+	SX1276Process();
     if(send_flag)
     {
         remote_update();
@@ -136,23 +154,9 @@ while (1)
         frame_update_crc(&tx);
         HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
         send_flag = 0;
-        //        tx.head1 = 0xAA;
-        //        tx.head2 = 0x55;
-        //        tx.ch.roll = ch.roll;
-        //        tx.ch.pitch = ch.pitch;
-        //        tx.ch.yaw = ch.yaw;
-        //        tx.ch.throttle = ch.throttle;
-        //        tx.crc = crcme((uint8_t *)&tx,sizeof(Frame)-2);
-        //        HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
-        //        send_flag	 = 0;
+           send_flag	 = 0;
     }
-//    sprintf(buf,"%d %d %d %d\r\n",
-//           ch.roll,
-//           ch.pitch,
-//           ch.yaw,
-//           ch.throttle);
-//    uart_send_string(buf);
-		
+
 
     /* USER CODE END WHILE */
 
