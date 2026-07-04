@@ -3,7 +3,7 @@
 
 #include "main.h"
 #include <stdint.h>
-#include "remote.h"
+#include "data_types.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -17,9 +17,22 @@
 // #define FRAME_TYPE_SIZE   1
 // #define FRAME_CRC_SIZE    2
 
+#pragma pack(push, 1)
+typedef struct
+{
+    uint8_t head1;
+    uint8_t head2;
+    uint8_t length;
+    uint8_t type;
+    Channels_t ch;
+    uint16_t crc;
+
+} Frame;
+#pragma pack(pop)
+
 uint16_t protocol_crc(uint8_t *data, uint16_t len);
 void frame_init(Frame *frame);
-void frame_setchannels(Frame *frame,const Channels *ch);
+void frame_setchannels(Frame *frame,const Channels_t *ch);
 void frame_update_crc(Frame *frame);
 
 #endif

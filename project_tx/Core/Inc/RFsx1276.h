@@ -3,7 +3,8 @@
 #include <stdint.h>
 #include "spi.h"
 #include "main.h"
-//#include "stm32f10x_gpio.h"
+
+
 #define bool _Bool
 #define true    1
 #define false   0

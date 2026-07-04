@@ -38,7 +38,8 @@
 /* USER CODE BEGIN PTD */
 #include "protocol.h"
 #include "RFsx1276.h"
-
+#include "data_types.h"
+#include "transport.h"
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -57,33 +58,40 @@
 volatile uint16_t adc_buf[4] = {0};
 volatile uint16_t send_flag = 0;
 Frame tx;
-extern Channels ch;
+extern Channels_t ch;
 char buf[64];
+uint32_t last_time = 0;
+typedef enum
+{
+    STATE_INIT = 0,
+    STATE_NORMAL,
+    STATE_SLEEP,
+    STATE_CALIBRATION,
+    STATE_FAILSAFE
+}SystemState;
+SystemState current_state = STATE_INIT;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void apply_failsafe(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-
-
 // void uart_send_string(const char *str)
 // {
-   
-// }
 
+// }
 
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
 
@@ -115,52 +123,84 @@ int main(void)
   MX_TIM2_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-	RF_Sx1276_Init();
+  RF_Sx1276_Init();
   remote_init();
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, 4);
   HAL_TIM_Base_Start_IT(&htim2);
-	SX1276StartRx();
+  SX1276StartRx();
   //  uart_send_string("Program Start\r\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	uint8_t spi_tx_data = 0xAA; 
-  uint8_t spi_rx_data = 0x00;
-while (1)
-{
-//	 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13); 
-//	
-//	 HAL_GPIO_WritePin(LORA_NSS_GPIO_Port, LORA_NSS_Pin, GPIO_PIN_RESET);
-//	
-//	if(HAL_SPI_TransmitReceive(&hspi1, &spi_tx_data, &spi_rx_data, 1, 100) != HAL_OK)
-//    {
-//        // ?? SPI ??,LED ???(??????????)
-//        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-//        Error_Handler();
-//    }
-//		
-//		HAL_GPIO_WritePin(LORA_NSS_GPIO_Port, LORA_NSS_Pin, GPIO_PIN_SET);
-//		
-//		HAL_Delay(200); 
-                                                   
-	SX1276Process();
-    if(send_flag)
-    {
-        remote_update();
-        frame_init(&tx);
-        frame_setchannels(&tx, &ch);
-        frame_update_crc(&tx);
-        HAL_UART_Transmit(&huart1, (uint8_t *)&tx, sizeof(Frame), 10);
-        send_flag = 0;
-           send_flag	 = 0;
-    }
+  //   uint8_t spi_tx_data = 0xAA;
+  //   uint8_t spi_rx_data = 0x00
+  while (1)
+  {
+      //	 HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+      //
+      //	 HAL_GPIO_WritePin(LORA_NSS_GPIO_Port, LORA_NSS_Pin, GPIO_PIN_RESET);
+      //
+      //	if(HAL_SPI_TransmitReceive(&hspi1, &spi_tx_data, &spi_rx_data, 1, 100) != HAL_OK)
+      //    {
+      //        // ?? SPI ??,LED ???(??????????)
+      //        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+      //        Error_Handler();
+      //    }
+      //
+      //		HAL_GPIO_WritePin(LORA_NSS_GPIO_Port, LORA_NSS_Pin, GPIO_PIN_SET);
+      //
+      //		HAL_Delay(200);
 
+      SX1276Process();
+       if (current_state == STATE_INIT)
+      {
+          current_state = STATE_NORMAL;
+      }
+      if (send_flag)
+      {
+          send_flag = 0;
+          switch (current_state)
+          {
+          case STATE_INIT:
+              break;
+          case STATE_NORMAL:
+              remote_update((uint16_t *)adc_buf);
+              frame_init(&tx);
+              frame_setchannels(&tx, &ch);
+              frame_update_crc(&tx);
+              if (transport_send((uint8_t *)&tx, sizeof(Frame)) == 1)
+              {
+                  last_time = HAL_GetTick();
+              }
+              break;
+          case STATE_SLEEP:
+              break;
+          case STATE_CALIBRATION:
+              break;
+          case STATE_FAILSAFE:
+              apply_failsafe();
+              break;
+          default:
+              current_state = STATE_INIT;
+              break;
+          }
+      }
+      if (HAL_GetTick() - last_time > 500)
+      {
+          current_state = STATE_FAILSAFE;
+      } 
+      else 
+      {
+          if (current_state == STATE_FAILSAFE)
+          {
+              current_state = STATE_NORMAL;
+          }
+      }
+      /* USER CODE END WHILE */
 
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+      /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -212,6 +252,17 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void apply_failsafe(void)
+{
+    ch.roll = 0;
+    ch.pitch = 0;
+    ch.yaw = 0;
+    ch.throttle = 0;
+    frame_init(&tx);
+    frame_setchannels(&tx, &ch);
+    frame_update_crc(&tx);
+    transport_send((uint8_t *)&tx, sizeof(Frame));
+}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -219,24 +270,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
         send_flag = 1;
     }
-}
+ }
 
-/* USER CODE END 4 */
+    /* USER CODE END 4 */
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
-}
+    /**
+     * @brief  This function is executed in case of error occurrence.
+     * @retval None
+     */
+    void Error_Handler(void)
+    {
+        /* USER CODE BEGIN Error_Handler_Debug */
+        /* User can add his own implementation to report the HAL error return state */
+        __disable_irq();
+        while (1)
+        {
+        }
+        /* USER CODE END Error_Handler_Debug */
+    }
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number

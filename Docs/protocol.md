@@ -11,7 +11,7 @@ Channels
 |
 Frame
 |
-UART/LoRa
+LoRa
 |
 Frame Parser
 |

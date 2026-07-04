@@ -1,9 +1,10 @@
 #include "remote.h"
 #include "adc.h"
 
-extern  volatile uint16_t adc_buf[4];
+// extern  volatile uint16_t adc_buf[4];
 
-Channels ch;
+extern uint32_t last_time;
+Channels_t ch;
 Remote rem;
 void remote_init(void)
 {
@@ -18,17 +19,17 @@ void remote_init(void)
 int  improvenum(uint16_t raw)
 {
    
-    int deadnum = (int)raw - 2048;
-    if (deadnum > -50 &&deadnum < 50)
+    int deadnum = (int)raw - ADC_MID_VALUE;
+    if (deadnum > -DEAD_NUM &&deadnum < DEAD_NUM)
     {
         deadnum = 0;
     }
-    return (deadnum * 1000) / 2048;
+    return (deadnum * CONTROLER_MAX) / ADC_MID_VALUE;
 }
 
-void remote_update(void)
+void remote_update(uint16_t *raw_adc_buf)
 {
-    int raw_value[4] = {improvenum(adc_buf[0]), improvenum(adc_buf[1]), improvenum(adc_buf[2]), improvenum(adc_buf[3])};
+    int raw_value[4] = {improvenum(raw_adc_buf[0]), improvenum(raw_adc_buf[1]), improvenum(raw_adc_buf[2]), improvenum(raw_adc_buf[3])};
 
     for (int i = 0; i < 4; i++)
     {
@@ -43,7 +44,7 @@ void remote_update(void)
     ch.pitch = rem.ly;
     ch.yaw = rem.rx;
     ch.throttle = throttle_map(rem.ry);
-
+  
 }
 
 
@@ -51,9 +52,9 @@ int throttle_map(int raw)
 {
     if (raw < 0)
            raw = 0;
-    if (raw > 700)
-        raw = 700;
-        return (raw * 1000) / 700;
+    if (raw > THROTTLE_MAX_RAW)
+        raw = THROTTLE_MAX_RAW;
+        return (raw * THROTTLE_OUTPUT_MAX) / THROTTLE_MAX_RAW;
 }
 
 

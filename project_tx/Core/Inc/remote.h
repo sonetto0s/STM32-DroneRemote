@@ -2,8 +2,8 @@
 #define __REMOTE_H
 
 #include "main.h"
+#include "data_types.h"
 
-#pragma pack(push, 1)
 
 typedef struct
 {
@@ -15,33 +15,40 @@ typedef struct
 } Remote;
 
 
+#define ADC_MID_VALUE 2048
+#define DEAD_NUM 50
+#define CONTROLER_MAX 1000
+#define THROTTLE_MAX_RAW 700
+#define THROTTLE_OUTPUT_MAX 1000
 
-typedef struct{
+#define FAILSAFE_TIMEOUT_MS 500
 
-    int16_t roll;
-    int16_t pitch;
-    int16_t yaw;
-    int16_t throttle;
+// typedef struct{
 
-}Channels;
+//     int16_t roll;
+//     int16_t pitch;
+//     int16_t yaw;
+//     int16_t throttle;
 
-typedef struct
-{
-	uint8_t head1;
-    uint8_t head2;
-    uint8_t length;
-	uint8_t type;
-	Channels ch;
-    uint16_t crc;
+// }Channels;
 
-} Frame;
+// typedef struct
+// {
+// 	uint8_t head1;
+//     uint8_t head2;
+//     uint8_t length;
+// 	uint8_t type;
+// 	Channels_t ch;
+//     uint16_t crc;
 
-#pragma pack(pop)
+// } Frame;
+
+
 extern Remote rem;
-extern Channels ch;
+extern Channels_t ch;
 
 void remote_init(void);
-void remote_update(void);
+void remote_update(uint16_t *raw_adc_buf);
 int throttle_map(int raw);
 
 

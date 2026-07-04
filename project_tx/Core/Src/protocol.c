@@ -26,15 +26,15 @@ void frame_init(Frame *frame)
 {
     frame->head1 = FRAME_HEADER_1;
     frame->head2 = FRAME_HEADER_2;
-    frame->length = sizeof(Channels);
+    frame->length = sizeof(Channels_t);
     frame->type = FRAME_TYPE_CHANNEL;
-    memset(&(frame->ch), 0, sizeof(Channels));
+    memset(&(frame->ch), 0, sizeof(Channels_t));
     frame->crc = 0;
 }
 
-void frame_setchannels(Frame *frame,const Channels *ch)
+void frame_setchannels(Frame *frame,const Channels_t *ch)
 {
-    memcpy(&(frame->ch), ch, sizeof(Channels));
+    memcpy(&(frame->ch), ch, sizeof(Channels_t));
 }
 
 void frame_update_crc(Frame *frame)
