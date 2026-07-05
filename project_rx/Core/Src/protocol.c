@@ -26,15 +26,15 @@ void frame_init(Frame *frame)
 {
     frame->head1 = FRAME_HEADER_1;
     frame->head2 = FRAME_HEADER_2;
-    frame->length = sizeof(Channels);
+    frame->length = sizeof(Channels_t);
     frame->type = FRAME_TYPE_CHANNEL;
-    memset(&(frame->ch), 0, sizeof(Channels));
+    memset(&(frame->ch), 0, sizeof(Channels_t));
     frame->crc = 0;
 }
 
-void frame_getchannels(Frame *frame,Channels *ch)
+void frame_getchannels(Frame *frame,Channels_t *ch)
 {
-    memcpy(ch,&(frame->ch),sizeof(Channels));
+    memcpy(ch,&(frame->ch),sizeof(Channels_t));
 }
 
 void frame_update_crc (Frame *frame)
@@ -48,7 +48,7 @@ uint8_t frame_check(const Frame *frame)
         return FRAME_HEAD_ERR;
     if (frame->head2 != FRAME_HEADER_2)
         return FRAME_HEAD_ERR;
-    if (frame->length != sizeof(Channels))
+    if (frame->length != sizeof(Channels_t))
         return FRAME_LEN_ERR;
     if (frame->type != FRAME_TYPE_CHANNEL)
         return FRAME_TYPE_ERR;
@@ -71,10 +71,7 @@ int frame_parser(uint8_t * buf,uint16_t len,Frame *fr)
             {
                 memcpy(fr, &buf[i], sizeof(Frame));
                 return 1;
-                // if (frame_check(fr) == FRAME_OK)
-                // {
-
-                // }
+              
             }
     }
     return 0;

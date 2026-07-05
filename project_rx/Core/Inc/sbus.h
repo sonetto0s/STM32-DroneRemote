@@ -5,7 +5,7 @@
 #include "remote.h"
 #include "usart.h"
 #define SBUS_FRAME_LEN 25
-#define SBUS_CHANNELS 16
+#define SBUS_CHANNELS 4
 typedef struct
 {
 
@@ -17,6 +17,6 @@ typedef struct
 static uint16_t sbus_map(int16_t value);
 void sbus_encoder(uint16_t *ch, SBUS_FRAME *frame);
 void sbus_send(SBUS_FRAME *Frame);
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
 #endif
 

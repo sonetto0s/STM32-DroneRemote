@@ -1,7 +1,7 @@
 #include "sbus.h"
 
 uint8_t sbus_frame[SBUS_FRAME_LEN];
-uint16_t ch;
+//uint16_t ch;
 static uint16_t sbus_map(int16_t value)
 {
     if (value < 1000)
@@ -42,5 +42,5 @@ void sbus_encoder(uint16_t *channels,SBUS_FRAME * frame)
 
 void sbus_send(SBUS_FRAME *Frame)
 {
-    HAL_UART_Transmit(&huart1,Frame->sbus_frame_data,SBUS_FRAME_LEN,10);
+    HAL_UART_Transmit(&huart2,Frame->sbus_frame_data,SBUS_FRAME_LEN,10);
 }

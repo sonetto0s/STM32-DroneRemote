@@ -89,9 +89,9 @@ void apply_failsafe(void);
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
 
@@ -198,9 +198,9 @@ int main(void)
               current_state = STATE_NORMAL;
           }
       }
-      /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-      /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -261,7 +261,10 @@ void apply_failsafe(void)
     frame_init(&tx);
     frame_setchannels(&tx, &ch);
     frame_update_crc(&tx);
-    transport_send((uint8_t *)&tx, sizeof(Frame));
+    if (transport_send((uint8_t *)&tx, sizeof(Frame)) == 1)
+    {
+        last_time = HAL_GetTick(); 
+    }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -272,22 +275,22 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
  }
 
-    /* USER CODE END 4 */
+/* USER CODE END 4 */
 
-    /**
-     * @brief  This function is executed in case of error occurrence.
-     * @retval None
-     */
-    void Error_Handler(void)
-    {
-        /* USER CODE BEGIN Error_Handler_Debug */
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
         /* User can add his own implementation to report the HAL error return state */
         __disable_irq();
         while (1)
         {
         }
-        /* USER CODE END Error_Handler_Debug */
-    }
+  /* USER CODE END Error_Handler_Debug */
+}
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
