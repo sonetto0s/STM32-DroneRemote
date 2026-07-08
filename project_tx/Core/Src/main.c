@@ -161,6 +161,7 @@ int main(void)
       if (send_flag)
       {
           send_flag = 0;
+          last_time = HAL_GetTick();
           switch (current_state)
           {
           case STATE_INIT:
@@ -170,10 +171,7 @@ int main(void)
               frame_init(&tx);
               frame_setchannels(&tx, &ch);
               frame_update_crc(&tx);
-              if (transport_send((uint8_t *)&tx, sizeof(Frame)) == 1)
-              {
-                  last_time = HAL_GetTick();
-              }
+              transport_send((uint8_t *)&tx, sizeof(Frame));
               break;
           case STATE_SLEEP:
               break;

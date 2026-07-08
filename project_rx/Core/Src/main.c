@@ -279,7 +279,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2)
     {
-        sbus_encoder((uint16_t *)&ch, &sbus);
+        sbus_encoder((int16_t *)&ch, &sbus);
         sbus_send(&sbus);
     }
 }

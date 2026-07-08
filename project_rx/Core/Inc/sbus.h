@@ -15,7 +15,7 @@ typedef struct
 
 
 static uint16_t sbus_map(int16_t value);
-void sbus_encoder(uint16_t *ch, SBUS_FRAME *frame);
+void sbus_encoder(int16_t *Channels_t, SBUS_FRAME *frame);
 void sbus_send(SBUS_FRAME *Frame);
 extern UART_HandleTypeDef huart2;
 #endif

@@ -2,18 +2,26 @@
 
 uint8_t sbus_frame[SBUS_FRAME_LEN];
 //uint16_t ch;
+// static uint16_t sbus_map(int16_t value)
+// {
+//     if (value < 1000)
+//         value = 1000;
+//     if(value>2000)
+//         value = 2000;
+
+//     return (value - 1000) * 1639 / 1000 + 172;
+// }
 static uint16_t sbus_map(int16_t value)
 {
-    if (value < 1000)
+   
+    if (value < -1000)
+        value = -1000;
+    if (value > 1000)
         value = 1000;
-    if(value>2000)
-        value = 2000;
-
-    return (value - 1000) * 1639 / 1000 + 172;
+    return (value + 1000) * 1639 / 2000 + 172;
 }
 
-
-void sbus_encoder(uint16_t *channels,SBUS_FRAME * frame)
+void sbus_encoder(int16_t *Channels_t,SBUS_FRAME * frame)
 {
     uint8_t *buf = frame->sbus_frame_data;
     uint32_t bitbuf = 0;
@@ -24,7 +32,7 @@ void sbus_encoder(uint16_t *channels,SBUS_FRAME * frame)
         buf[i] = 0;
     for (int i = 0; i < SBUS_CHANNELS; i++)
     {
-        uint16_t val = sbus_map(channels[i]);
+        uint16_t val = sbus_map(Channels_t[i]);
         bitbuf |= (val << bitcount);
         bitcount += 11;
         while (bitcount >= 8)
